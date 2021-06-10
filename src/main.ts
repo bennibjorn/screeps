@@ -28,6 +28,10 @@ declare global {
 	alliance?: string;
   }
 
+  interface SpawnMemory {
+	energyFullOnTick: number | null;
+  }
+
   // Syntax for adding proprties to `global` (ex "global.log")
   namespace NodeJS {
     interface Global {
