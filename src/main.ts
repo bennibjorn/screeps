@@ -2,6 +2,7 @@ import { ErrorMapper } from "utils/ErrorMapper";
 import harvester from './roles/harvester';
 import upgrader from './roles/upgrader';
 import builder from './roles/builder';
+import spawn from './buildings/spawn';
 
 declare global {
   /*
@@ -52,6 +53,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
       builder.run(creep);
     }
   }
+  spawn.run(Game.spawns['Spawn1']);
 
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {
