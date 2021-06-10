@@ -1,4 +1,7 @@
 import { ErrorMapper } from "utils/ErrorMapper";
+import harvester from './roles/harvester';
+import upgrader from './roles/upgrader';
+import builder from './roles/builder';
 
 declare global {
   /*
@@ -17,8 +20,11 @@ declare global {
 
   interface CreepMemory {
     role: string;
-    room: string;
-    working: boolean;
+    room?: string;
+    working?: boolean;
+	upgrading?: boolean;
+	building?: boolean;
+	alliance?: string;
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -32,7 +38,20 @@ declare global {
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
-  console.log(`Current game tick is ${Game.time}`);
+//   console.log(`Current game tick is ${Game.time}`);
+
+  for (var name in Game.creeps) {
+    var creep = Game.creeps[name];
+    if (creep.memory.role == "harvester") {
+      harvester.run(creep);
+    }
+    if (creep.memory.role == "upgrader") {
+      upgrader.run(creep);
+    }
+    if (creep.memory.role == "builder") {
+      builder.run(creep);
+    }
+  }
 
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {
