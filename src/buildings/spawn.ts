@@ -1,14 +1,12 @@
 import harvester from 'roles/harvester';
 import upgrader from 'roles/upgrader';
 import builder from '../roles/builder';
-
-// TODO: move this into a util class
-const getNumberOfCreepsByRole = (role: string) => {
-	return _.filter(Game.creeps, (creep) => creep.memory.role === role).length;
-}
+import { getNumberOfCreepsByRole } from 'utils/creeps';
 
 const buildersWanted = (room: Room) => {
-	return room.find(FIND_CONSTRUCTION_SITES).length >= 1;
+	const constructionSites = room.find(FIND_CONSTRUCTION_SITES);
+	const roadsToRepair = room.find<StructureRoad>(FIND_STRUCTURES, { filter: STRUCTURE_ROAD }).filter((road) => road.hits < (road.hitsMax / 2));
+	return constructionSites.length >= 1 || roadsToRepair.length > 5;
 }
 
 const totalEnergy = (spawn: StructureSpawn) => {
@@ -21,11 +19,11 @@ const buildingSpawn = {
 	run: (spawn: StructureSpawn) => {
 		if (spawn.spawning) return;
 		// spawn basic first
-		if (totalEnergy(spawn) >= 200 && getNumberOfCreepsByRole('harvester') === 0) {
-			console.log('No harvesters, spawning a harvester');
+		if (totalEnergy(spawn) >= 200 && getNumberOfCreepsByRole('harvester') <= 2) {
+			console.log('want more harvesters');
 			harvester.spawnBasic(spawn);
 		} else if (totalEnergy(spawn) >= 200 && getNumberOfCreepsByRole('upgrader') === 0) {
-			console.log("No upgraders, spawning an upgrader");
+			console.log("need at least one upgrader");
 			upgrader.spawnBasic(spawn);
 		} else if (buildersWanted(spawn.room) && getNumberOfCreepsByRole('builder') <= 3 && totalEnergy(spawn) >= 200) {
 			console.log('want more builders');

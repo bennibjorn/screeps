@@ -25,6 +25,7 @@ declare global {
     working?: boolean;
     upgrading?: boolean;
     building?: boolean;
+	buildingStructure?: Id<Structure>;
     harvestingFrom?: Id<Source>;
     alliance?: string; // TODO
   }
