@@ -10,6 +10,14 @@ const spawnBasic = (spawn: StructureSpawn, num?: number) => {
   }
 }
 
+const spawnBeefy = (spawn: StructureSpawn, num?: number) => {
+  // get number of builders already
+  const number = num || Object.keys(Game.creeps).filter(x => Game.creeps[x].memory.role === 'upgrader').length;
+  if (Game.spawns[spawn.name].spawnCreep( [MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY], 'Beefy' + upgraderBaseName + number, { memory: { role: 'upgrader' } } ) === ERR_NAME_EXISTS) {
+    spawnBeefy(spawn, number + 1);
+  }
+}
+
 const roleUpgrader = {
   /** @param {Creep} creep **/
   run: function (creep: Creep) {
@@ -36,7 +44,8 @@ const roleUpgrader = {
       harvestEnergy(creep);
     }
   },
-  spawnBasic
+  spawnBasic,
+  spawnBeefy
 };
 
 export default roleUpgrader;

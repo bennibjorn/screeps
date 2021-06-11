@@ -12,7 +12,9 @@ const buildersWanted = (room: Room) => {
 }
 
 const totalEnergy = (spawn: StructureSpawn) => {
-	return spawn.store.getUsedCapacity('energy');
+	// while there is only one spawn, this will suffice
+	return spawn.room.energyAvailable;
+	//return spawn.store.getUsedCapacity('energy');
 }
 
 const buildingSpawn = {
@@ -31,6 +33,9 @@ const buildingSpawn = {
 		} else if (!buildersWanted(spawn.room) && getNumberOfCreepsByRole('upgrader') <= 3 && totalEnergy(spawn) >= 200) {
 			console.log('get more upgraders while nothing else is going on');
 			upgrader.spawnBasic(spawn);
+		} else if (totalEnergy(spawn) >= 550) {
+			console.log('BIG BOI');
+			upgrader.spawnBeefy(spawn);
 		}
 	}
 };
