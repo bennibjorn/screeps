@@ -3,22 +3,29 @@ export const chooseSource = (creep: Creep, sources: Source[]): Id<Source> => {
     // look for walls at source location
     // if there is a free spot, remaining energy and regen is reasonable, choose it
     let optimalSource: Id<Source> = sources[0].id;
+	const availableSpaces: Array<{ id: Id<Source>, availableSpaces: number }> = [];
     sources.forEach((source) => {
-        const rangeToCurrentOptimalSource = Game.getObjectById(optimalSource)?.pos.getRangeTo(creep.pos) as number;
+        // const rangeToCurrentOptimalSource = Game.getObjectById(optimalSource)?.pos.getRangeTo(creep.pos) as number;
         const mostAvailableSides = 9;
         const creepsAtSource = creep.room.lookForAtArea(LOOK_CREEPS, source.pos.y + 1, source.pos.x - 1, source.pos.y - 1, source.pos.x + 1, true).length;
         const wallsAtSource = creep.room.lookForAtArea(LOOK_TERRAIN, source.pos.y + 1, source.pos.x - 1, source.pos.y - 1, source.pos.x + 1, true).length;
-        const availableSpaces = mostAvailableSides - creepsAtSource - wallsAtSource;
-        if (availableSpaces >= 1 && source.pos.getRangeTo(creep.pos) < rangeToCurrentOptimalSource) {
-            optimalSource = source.id;
-        }
+        const free = mostAvailableSides - creepsAtSource - wallsAtSource;
+		if (source.energy !== 0) {
+			availableSpaces.push({ id: source.id, availableSpaces: free });
+		}
     });
-    return optimalSource;
+    return availableSpaces.sort((a, b) => b.availableSpaces - a.availableSpaces)[0].id;
 }
 export const harvestOrMoveTowardsSource = (creep: Creep, source: Source) => {
-    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(source, { visualizePathStyle: { stroke: "#ffaa00" } });
-    }
+	const res = creep.harvest(source);
+    if (res === ERR_NOT_IN_RANGE) {
+        const moveRes = creep.moveTo(source, { visualizePathStyle: { stroke: "#ffaa00" } });
+		if (moveRes === ERR_NO_PATH) {
+			delete creep.memory.harvestingFrom;
+		}
+    } else if (res === ERR_NOT_ENOUGH_ENERGY) {
+		delete creep.memory.harvestingFrom;
+	}
 }
 export const harvestEnergy = (creep: Creep) => {
     if (creep.memory.harvestingFrom) {

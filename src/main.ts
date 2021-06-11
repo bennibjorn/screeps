@@ -20,14 +20,14 @@ declare global {
   }
 
   interface CreepMemory {
-    role: string;
-    room?: string;
-    working?: boolean;
-    upgrading?: boolean;
-    building?: boolean;
-	buildingStructure?: Id<Structure>;
-    harvestingFrom?: Id<Source>;
-    alliance?: string; // TODO
+      role: string;
+      room?: string;
+      working?: boolean;
+      upgrading?: boolean;
+      building?: boolean;
+      buildingStructure?: Id<any>;
+      harvestingFrom?: Id<Source>;
+      alliance?: string; // TODO
   }
 
   interface SpawnMemory {
