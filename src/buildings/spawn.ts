@@ -8,7 +8,7 @@ const getNumberOfCreepsByRole = (role: string) => {
 }
 
 const buildersWanted = (room: Room) => {
-	return room.find(FIND_CONSTRUCTION_SITES).length > 1;
+	return room.find(FIND_CONSTRUCTION_SITES).length >= 1;
 }
 
 const totalEnergy = (spawn: StructureSpawn) => {

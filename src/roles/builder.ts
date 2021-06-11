@@ -23,16 +23,23 @@ const roleBuilder = {
       creep.say("🚧 build");
     }
 
-    if (creep.memory.building) {
-      var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-      if (targets.length) {
-        if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
-        }
-      }
-    } else {
-      harvestEnergy(creep);
-    }
+	if (creep.memory.building) {
+		const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+		const roadsToRepair = creep.room.find<StructureRoad>(FIND_STRUCTURES, {
+			filter: (object) => {
+				return object.structureType === STRUCTURE_ROAD && (object.hits < (object.hitsMax / 2)); }})
+		if (roadsToRepair.length) {
+			if (creep.repair(roadsToRepair[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(roadsToRepair[0], { visualizePathStyle: { stroke: "#ffffff" } });
+            }
+		} else if (targets.length) {
+			if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
+				creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
+			}
+		}
+	} else {
+	harvestEnergy(creep);
+	}
   },
   spawnBasic
 };
