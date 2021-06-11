@@ -1,31 +1,38 @@
-const FULL_ENERGY_TICK_THRESHOLD = 200;
+import harvester from 'roles/harvester';
+import upgrader from 'roles/upgrader';
+import builder from '../roles/builder';
 
-const spawnEnergyFullForTooLong = (spawn: StructureSpawn) => {
-	return spawn.store.getFreeCapacity('energy') === 0 && spawn.memory.energyFullOnTick !== null && (spawn.memory.energyFullOnTick + FULL_ENERGY_TICK_THRESHOLD) >= Game.time;
+// TODO: move this into a util class
+const getNumberOfCreepsByRole = (role: string) => {
+	return _.filter(Game.creeps, (creep) => creep.memory.role === role).length;
 }
 
-const getNumberOfCreepsByName = (name: string) => {
-	return Object.keys(Game.creeps).filter(x => x.startsWith(name)).length;
+const buildersWanted = (room: Room) => {
+	return room.find(FIND_CONSTRUCTION_SITES).length > 1;
+}
+
+const totalEnergy = (spawn: StructureSpawn) => {
+	return spawn.store.getUsedCapacity('energy');
 }
 
 const buildingSpawn = {
-  run: (spawn: StructureSpawn) => {
-	  if (spawn.spawning) return;
-	//   if (spawn.store.getCapacity('energy') === spawn.store.energy)
-	  if (spawn.store.energy >= 200 && Object.keys(Game.creeps).length === 0) {
-		console.log('No creeps, spawning a harvester');
-		spawn.spawnCreep([MOVE, WORK, CARRY], "Harry1", { memory: { role: "harvester" } });
-	  } else if (spawn.store.energy >= 200 && getNumberOfCreepsByName('Upton') === 0) {
-		console.log("No upgraders, spawning an upgrader");
-		spawn.spawnCreep([MOVE, WORK, CARRY], "Upton1", { memory: { role: "upgrader" } });
-	  }
-	// if spawn energy has been full for some time, no need for more harvesters
-	// if (spawnEnergyFullForTooLong(spawn)) {
-
-	// }
-	// if spawn energy never gets to full, need more harvesters
-	// if there are no creeps, spawn an upgrader
-  }
+	run: (spawn: StructureSpawn) => {
+		if (spawn.spawning) return;
+		// spawn basic first
+		if (totalEnergy(spawn) >= 200 && getNumberOfCreepsByRole('harvester') === 0) {
+			console.log('No harvesters, spawning a harvester');
+			harvester.spawnBasic(spawn);
+		} else if (totalEnergy(spawn) >= 200 && getNumberOfCreepsByRole('upgrader') === 0) {
+			console.log("No upgraders, spawning an upgrader");
+			upgrader.spawnBasic(spawn);
+		} else if (buildersWanted(spawn.room) && getNumberOfCreepsByRole('builder') <= 3 && totalEnergy(spawn) >= 200) {
+			console.log('want more builders');
+			builder.spawnBasic(spawn);
+		} else if (!buildersWanted(spawn.room) && getNumberOfCreepsByRole('upgrader') <= 3 && totalEnergy(spawn) >= 200) {
+			console.log('get more upgraders while nothing else is going on');
+			upgrader.spawnBasic(spawn);
+		}
+	}
 };
 
 export default buildingSpawn;

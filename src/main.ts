@@ -23,9 +23,10 @@ declare global {
     role: string;
     room?: string;
     working?: boolean;
-	upgrading?: boolean;
-	building?: boolean;
-	alliance?: string;
+    upgrading?: boolean;
+    building?: boolean;
+    harvestingFrom?: Id<Source>;
+    alliance?: string; // TODO
   }
 
   interface SpawnMemory {

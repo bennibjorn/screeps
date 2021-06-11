@@ -1,5 +1,13 @@
-const withdrawFromRuins = () => {
+import { harvestEnergy } from "utils/harvest";
 
+export const upgraderBaseName = 'UptownGirl';
+
+const spawnBasic = (spawn: StructureSpawn, num?: number) => {
+  // get number of builders already
+  const number = num || Object.keys(Game.creeps).filter(x => Game.creeps[x].memory.role === 'upgrader').length;
+  if (Game.spawns[spawn.name].spawnCreep( [WORK, CARRY, MOVE], upgraderBaseName + number, { memory: { role: 'upgrader' } } ) === ERR_NAME_EXISTS) {
+    spawnBasic(spawn, number + 1);
+  }
 }
 
 const roleUpgrader = {
@@ -16,6 +24,7 @@ const roleUpgrader = {
     }
     if (!creep.memory.upgrading && creep.store.getFreeCapacity() == 0) {
       creep.memory.upgrading = true;
+      delete creep.memory.harvestingFrom;
       creep.say("⚡ upgrade");
     }
 
@@ -24,12 +33,10 @@ const roleUpgrader = {
         creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: "#ffffff" } });
       }
     } else {
-      var sources = creep.room.find(FIND_SOURCES);
-      if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
-      }
+      harvestEnergy(creep);
     }
-  }
+  },
+  spawnBasic
 };
 
 export default roleUpgrader;

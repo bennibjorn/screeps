@@ -1,11 +1,24 @@
+import { harvestEnergy } from "utils/harvest";
+
+export const builderBaseName = 'Bob';
+
+const spawnBasic = (spawn: StructureSpawn, num?: number) => {
+  // get number of builders already
+  const number = num || Object.keys(Game.creeps).filter(x => Game.creeps[x].memory.role === 'builder').length;
+  if (Game.spawns[spawn.name].spawnCreep( [WORK, CARRY, MOVE], builderBaseName + number, { memory: { role: 'builder' } } ) === ERR_NAME_EXISTS) {
+    spawnBasic(spawn, number + 1);
+  }
+}
+
 const roleBuilder = {
   /** @param {Creep} creep **/
-  run: function (creep: Creep) {
+  run: (creep: Creep) => {
     if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
       creep.memory.building = false;
       creep.say("🔄 harvest");
     }
     if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
+      delete creep.memory.harvestingFrom;
       creep.memory.building = true;
       creep.say("🚧 build");
     }
@@ -18,12 +31,10 @@ const roleBuilder = {
         }
       }
     } else {
-      var sources = creep.room.find(FIND_SOURCES);
-      if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
-      }
+      harvestEnergy(creep);
     }
-  }
+  },
+  spawnBasic
 };
 
 export default roleBuilder;
