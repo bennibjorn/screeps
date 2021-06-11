@@ -39,10 +39,10 @@ const roleBuilder = {
 
 	if (creep.memory.building && creep.memory.buildingStructure) {
 		const target = Game.getObjectById(creep.memory.buildingStructure);
-		if (target?.hits && target?.hits < target?.hitsMax) {
+		if (target?.hits && target?.hits < (target?.hitsMax / 2)) {
 			// repair
 			repair(creep, target);
-		} else if (target?.progress) {
+		} else if (target?.progress < target?.progressTotal) {
 			// build
 			build(creep, target);
 		} else {
@@ -50,19 +50,15 @@ const roleBuilder = {
 			console.log('Unknown build target ', JSON.stringify(target));
 			delete creep.memory.buildingStructure;
 		}
-		if (target !== null && target.structureType === 'road' && target.hits < target.hitsMax) {
-			console.log(target.structureType);
-		}
 	} else if (creep.memory.building) {
 		const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-		const roadsToRepair = creep.room.find<StructureRoad>(FIND_STRUCTURES, {
-			filter: (object) => {
-				return object.structureType === STRUCTURE_ROAD && (object.hits < (object.hitsMax / 2)); }})
-		if (roadsToRepair.length) {
-			repair(creep, roadsToRepair[0]);
-		} else if (targets.length) {
-			build(creep, targets[0]);
-		}
+		const thingsToRepair = creep.room.find<Structure>(FIND_STRUCTURES, {
+			filter: (object: Structure) =>  (object.hits < (object.hitsMax / 2)) })
+		if (thingsToRepair.length) {
+            repair(creep, thingsToRepair[0]);
+        } else if (targets.length) {
+            build(creep, targets[0]);
+        }
 	} else {
 		harvestEnergy(creep);
 	}

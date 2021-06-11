@@ -5,8 +5,8 @@ import { getNumberOfCreepsByName, getNumberOfCreepsByRole } from 'utils/creeps';
 
 const buildersWanted = (room: Room) => {
 	const constructionSites = room.find(FIND_CONSTRUCTION_SITES);
-	const roadsToRepair = room.find<StructureRoad>(FIND_STRUCTURES, { filter: STRUCTURE_ROAD }).filter((road) => road.hits < (road.hitsMax / 2));
-	return constructionSites.length >= 1 || roadsToRepair.length > 5;
+	const thingsToRepair = room.find<Structure>(FIND_STRUCTURES).filter(struct => struct.hits < struct.hitsMax / 2);
+	return constructionSites.length >= 1 || thingsToRepair.length >= 3;
 }
 
 const totalEnergy = (spawn: StructureSpawn) => {
