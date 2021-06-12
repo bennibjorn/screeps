@@ -1,4 +1,4 @@
-import { harvestEnergy } from "utils/energy";
+import { getEnergyFromContainersOrHarvest, harvestEnergy } from "utils/energy";
 
 export const upgraderBaseName = 'UptownGirl';
 
@@ -41,7 +41,7 @@ const roleUpgrader = {
         creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: "#ffffff" } });
       }
     } else {
-      harvestEnergy(creep);
+      getEnergyFromContainersOrHarvest(creep);
     }
   },
   spawnBasic,

@@ -42,12 +42,18 @@ export const harvestEnergy = (creep: Creep) => {
     }
 }
 export const getEnergyFromContainersOrHarvest = (creep: Creep) => {
-    const containersWithEnergy = creep.room.find<StructureContainer>(FIND_STRUCTURES, { filter: STRUCTURE_CONTAINER }).filter(x => x.store.energy > 0);
+    const containersWithEnergy = creep.room.find<StructureContainer>(FIND_STRUCTURES).filter((struct) => struct.structureType === STRUCTURE_CONTAINER && struct.store.energy > 0);
     if (containersWithEnergy.length > 1) {
         // find closest, get from that one
-
+		const distances = containersWithEnergy.map((container) => {
+			return creep.pos.getRangeTo(container.pos);
+		});
+		const minDistanceIndex = distances.indexOf(Math.min(...distances));
+		if (creep.withdraw(containersWithEnergy[minDistanceIndex], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+            creep.moveTo(containersWithEnergy[minDistanceIndex], { visualizePathStyle: { stroke: "#ffaa00" } });
+        }
     } else if (containersWithEnergy.length === 1) {
-        if (creep.transfer(containersWithEnergy[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+        if (creep.withdraw(containersWithEnergy[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             creep.moveTo(containersWithEnergy[0], { visualizePathStyle: { stroke: "#ffaa00" } });
         }
     } else {

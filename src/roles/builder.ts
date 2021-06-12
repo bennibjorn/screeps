@@ -1,4 +1,4 @@
-import { harvestEnergy } from "utils/energy";
+import { getEnergyFromContainersOrHarvest, harvestEnergy } from "utils/energy";
 
 export const builderBaseName = 'Bob';
 
@@ -15,6 +15,9 @@ const repair = (creep: Creep, target: Structure<StructureConstant>) => {
         creep.memory.buildingStructure = target.id;
         creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
     }
+	if (target.hits === target.hitsMax) {
+		delete creep.memory.buildingStructure;
+	}
 }
 const build = (creep: Creep, target: ConstructionSite<BuildableStructureConstant>) => {
     if (creep.build(target) == ERR_NOT_IN_RANGE) {
@@ -39,7 +42,7 @@ const roleBuilder = {
 
     if (creep.memory.building && creep.memory.buildingStructure) {
       const target = Game.getObjectById(creep.memory.buildingStructure);
-      if (target?.hits && target?.hits < (target?.hitsMax / 2)) {
+      if (target?.hits && target?.hits < target?.hitsMax) {
         // repair
         repair(creep, target);
       } else if (target?.progress < target?.progressTotal) {
@@ -60,9 +63,7 @@ const roleBuilder = {
               build(creep, targets[0]);
           }
     } else {
-      // check if containers with energy exist, get energy from them
-      // if no containers have energy, harvest
-      harvestEnergy(creep);
+      getEnergyFromContainersOrHarvest(creep);
     }
   },
   spawnBasic
