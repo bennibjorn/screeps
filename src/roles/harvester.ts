@@ -1,4 +1,4 @@
-import { harvestEnergy } from "utils/harvest";
+import { harvestEnergy } from "utils/energy";
 
 export const harvesterBaseName = 'Harry';
 

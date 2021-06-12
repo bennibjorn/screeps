@@ -1,4 +1,4 @@
-import { harvestEnergy } from "utils/harvest";
+import { harvestEnergy } from "utils/energy";
 
 export const builderBaseName = 'Bob';
 
@@ -28,8 +28,8 @@ const roleBuilder = {
   run: (creep: Creep) => {
     if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
       creep.memory.building = false;
-	  delete creep.memory.buildingStructure;
-      creep.say("🔄 harvest");
+	    delete creep.memory.buildingStructure;
+      creep.say("🔄 get energy");
     }
     if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
       delete creep.memory.harvestingFrom;
@@ -37,31 +37,33 @@ const roleBuilder = {
       creep.say("🚧 build");
     }
 
-	if (creep.memory.building && creep.memory.buildingStructure) {
-		const target = Game.getObjectById(creep.memory.buildingStructure);
-		if (target?.hits && target?.hits < (target?.hitsMax / 2)) {
-			// repair
-			repair(creep, target);
-		} else if (target?.progress < target?.progressTotal) {
-			// build
-			build(creep, target);
-		} else {
-			// unknown thing
-			console.log('Unknown build target ', JSON.stringify(target));
-			delete creep.memory.buildingStructure;
-		}
-	} else if (creep.memory.building) {
-		const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-		const thingsToRepair = creep.room.find<Structure>(FIND_STRUCTURES, {
-			filter: (object: Structure) =>  (object.hits < (object.hitsMax / 2)) })
-		if (thingsToRepair.length) {
-            repair(creep, thingsToRepair[0]);
-        } else if (targets.length) {
-            build(creep, targets[0]);
-        }
-	} else {
-		harvestEnergy(creep);
-	}
+    if (creep.memory.building && creep.memory.buildingStructure) {
+      const target = Game.getObjectById(creep.memory.buildingStructure);
+      if (target?.hits && target?.hits < (target?.hitsMax / 2)) {
+        // repair
+        repair(creep, target);
+      } else if (target?.progress < target?.progressTotal) {
+        // build
+        build(creep, target);
+      } else {
+        // unknown thing
+        console.log('Unknown build target ', JSON.stringify(target));
+        delete creep.memory.buildingStructure;
+      }
+    } else if (creep.memory.building) {
+      const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+      const thingsToRepair = creep.room.find<Structure>(FIND_STRUCTURES, {
+        filter: (object: Structure) =>  (object.hits < (object.hitsMax / 2)) })
+      if (thingsToRepair.length) {
+              repair(creep, thingsToRepair[0]);
+          } else if (targets.length) {
+              build(creep, targets[0]);
+          }
+    } else {
+      // check if containers with energy exist, get energy from them
+      // if no containers have energy, harvest
+      harvestEnergy(creep);
+    }
   },
   spawnBasic
 };
