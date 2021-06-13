@@ -19,13 +19,13 @@ const buildingSpawn = {
 		if (totalEnergy(spawn) >= 200) {
 			// must have spawns first
 			if (getNumberOfCreepsByRole('harvester') <= 2) {
-				console.log("spawn basic harvester, total harvesters will be: " + getNumberOfCreepsByRole('harvester'));
+				console.log("spawn basic harvester, total harvesters will be: " + getNumberOfCreepsByRole('harvester') + 1);
                 harvester.spawnBasic(spawn);
 			} else if (getNumberOfCreepsByRole('upgrader') === 0) {
 				console.log('spawn basic upgrader, total upgraders will be 1');
 				upgrader.spawnBasic(spawn);
 			} else if (buildersWanted(spawn.room) && getNumberOfCreepsByRole('builder') <= 3) {
-				console.log("spawn basic builder, total builders will be " + getNumberOfCreepsByRole("builder"));
+				console.log("spawn basic builder, total builders will be " + getNumberOfCreepsByRole("builder") + 1);
 				builder.spawnBasic(spawn);
 			}
 		}
