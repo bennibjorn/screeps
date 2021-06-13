@@ -10,6 +10,20 @@ const spawnBasic = (spawn: StructureSpawn, num?: number) => {
 	}
   }
 
+const sortEnergyReceiversByPriority = ((a: Structure, b: Structure) => {
+	if (b.structureType === STRUCTURE_SPAWN && a.structureType !== STRUCTURE_SPAWN) {
+		return 3;
+	} else if (b.structureType === STRUCTURE_EXTENSION && a.structureType !== STRUCTURE_EXTENSION) {
+        return 2;
+    } else if (b.structureType === STRUCTURE_CONTAINER && a.structureType !== STRUCTURE_CONTAINER) {
+		return 1;
+	} else if (b.structureType === STRUCTURE_TOWER) {
+		return -1;
+	} else {
+		return 0;
+	}
+})
+
 const roleHarvester = {
   /** @param {Creep} creep **/
 	run: (creep: Creep) => {
@@ -20,10 +34,13 @@ const roleHarvester = {
 			delete creep.memory.harvestingFrom;
 			const targets = creep.room.find(FIND_STRUCTURES, {
 				filter: (structure: any) => {
-				return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType === STRUCTURE_CONTAINER) &&
+				return (structure.structureType == STRUCTURE_EXTENSION ||
+						structure.structureType == STRUCTURE_SPAWN ||
+						structure.structureType === STRUCTURE_CONTAINER ||
+						structure.structureType === STRUCTURE_TOWER) &&
 					structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
 				}
-			});
+			}).sort(sortEnergyReceiversByPriority);
 			if(targets.length > 0) {
 				if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
 					creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});

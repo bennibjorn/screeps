@@ -42,7 +42,7 @@ const roleBuilder = {
 
     if (creep.memory.building && creep.memory.buildingStructure) {
       const target = Game.getObjectById(creep.memory.buildingStructure);
-      if (target?.hits && target?.hits < target?.hitsMax) {
+      if (target?.hits && target?.hits <= target?.hitsMax) {
         // repair
         repair(creep, target);
       } else if (target?.progress < target?.progressTotal) {

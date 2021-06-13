@@ -10,30 +10,33 @@ const buildersWanted = (room: Room) => {
 }
 
 const totalEnergy = (spawn: StructureSpawn) => {
-	// while there is only one spawn, this will suffice
 	return spawn.room.energyAvailable;
-	//return spawn.store.getUsedCapacity('energy');
 }
 
 const buildingSpawn = {
 	run: (spawn: StructureSpawn) => {
 		if (spawn.spawning) return;
-		// spawn basic first
-		if (totalEnergy(spawn) >= 200 && getNumberOfCreepsByRole('harvester') <= 2) {
-			console.log('want more harvesters');
-			harvester.spawnBasic(spawn);
-		} else if (totalEnergy(spawn) >= 200 && getNumberOfCreepsByRole('upgrader') === 0) {
-			console.log("need at least one upgrader");
-			upgrader.spawnBasic(spawn);
-		} else if (totalEnergy(spawn) >= 200 && buildersWanted(spawn.room) && getNumberOfCreepsByRole('builder') <= 3) {
-			console.log('want more builders');
-			builder.spawnBasic(spawn);
-		} else if (totalEnergy(spawn) >= 200 && !buildersWanted(spawn.room) && getNumberOfCreepsByRole('upgrader') <= 3) {
-			console.log('get more upgraders while nothing else is going on');
-			upgrader.spawnBasic(spawn);
-		} else if (totalEnergy(spawn) >= 550 && getNumberOfCreepsByName('BeefyUptownGirl') >= 5) {
-			console.log('BIG BOI');
-			upgrader.spawnBeefy(spawn);
+		if (totalEnergy(spawn) >= 200) {
+			// must have spawns first
+			if (getNumberOfCreepsByRole('harvester') <= 2) {
+				console.log("spawn basic harvester, total harvesters will be: " + getNumberOfCreepsByRole('harvester'));
+                harvester.spawnBasic(spawn);
+			} else if (getNumberOfCreepsByRole('upgrader') === 0) {
+				console.log('spawn basic upgrader, total upgraders will be 1');
+				upgrader.spawnBasic(spawn);
+			} else if (buildersWanted(spawn.room) && getNumberOfCreepsByRole('builder') <= 3) {
+				console.log("spawn basic builder, total builders will be " + getNumberOfCreepsByRole("builder"));
+				builder.spawnBasic(spawn);
+			}
+		}
+		if (totalEnergy(spawn) >= 600) {
+			// mid sized spawns
+			if (getNumberOfCreepsByName('BeefyUptownGirl') <= 5) {
+				console.log(
+                    "spawn beefy upgrader, total beefy upgraders will be " + getNumberOfCreepsByName("BeefyUptownGirl")
+                );
+				upgrader.spawnBeefy(spawn);
+			}
 		}
 	}
 };
