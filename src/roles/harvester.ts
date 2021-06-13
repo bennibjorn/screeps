@@ -8,7 +8,17 @@ const spawnBasic = (spawn: StructureSpawn, num?: number) => {
 	if (Game.spawns[spawn.name].spawnCreep( [WORK, CARRY, MOVE], harvesterBaseName + number, { memory: { role: 'harvester' } } ) === ERR_NAME_EXISTS) {
 	  spawnBasic(spawn, number + 1);
 	}
-  }
+}
+const spawnBeefy = (spawn: StructureSpawn, num?: number) => {
+	const number = num || Object.keys(Game.creeps).filter(x => Game.creeps[x].memory.role === "harvester").length;
+    if (
+        Game.spawns[spawn.name].spawnCreep([WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE], 'Beefy ' + harvesterBaseName + number, {
+            memory: { role: "harvester" }
+        }) === ERR_NAME_EXISTS
+    ) {
+        spawnBeefy(spawn, number + 1);
+    }
+}
 
 const sortEnergyReceiversByPriority = ((a: Structure, b: Structure) => {
 	if (b.structureType === STRUCTURE_SPAWN && a.structureType !== STRUCTURE_SPAWN) {
@@ -48,7 +58,8 @@ const roleHarvester = {
 			}
 		}
 	},
-	spawnBasic
+	spawnBasic,
+	spawnBeefy
 };
 
 export default roleHarvester;

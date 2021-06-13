@@ -31,9 +31,15 @@ const buildingSpawn = {
 		}
 		if (totalEnergy(spawn) >= 600) {
 			// mid sized spawns
-			if (getNumberOfCreepsByName('BeefyUptownGirl') <= 5) {
+			if (getNumberOfCreepsByName('BeefyHarry') <= 3) {
 				console.log(
-                    "spawn beefy upgrader, total beefy upgraders will be " + getNumberOfCreepsByName("BeefyUptownGirl")
+                    "spawn beefy harvester, total beefy harvesters will be " +
+                        getNumberOfCreepsByName("BeefyHarry") + 1
+                );
+				harvester.spawnBeefy(spawn);
+			} else if (getNumberOfCreepsByName('BeefyUptownGirl') <= 5) {
+				console.log(
+                    "spawn beefy upgrader, total beefy upgraders will be " + getNumberOfCreepsByName("BeefyUptownGirl") + 1
                 );
 				upgrader.spawnBeefy(spawn);
 			}
