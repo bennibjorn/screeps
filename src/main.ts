@@ -4,6 +4,7 @@ import upgrader from './roles/upgrader';
 import builder from './roles/builder';
 import carrier from './roles/carrier';
 import spawn from './buildings/spawn';
+import tower from './buildings/tower';
 
 declare global {
   /*
@@ -29,8 +30,9 @@ declare global {
       buildingStructure?: Id<any>;
       harvestingFrom?: Id<Source>;
       alliance?: string; // TODO
+	  workroom?: string;
+	  homeroom?: string;
   }
-
   interface SpawnMemory {
 	energyFullOnTick: number | null;
   }
@@ -68,7 +70,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
     if (Game.structures[id].structureType === 'spawn') {
       spawn.run(Game.structures[id] as StructureSpawn);
     }
-    // TODO: towers
+	if(Game.structures[id].structureType === 'tower') {
+		tower.run(Game.structures[id] as StructureTower);
+	}
+    // TODO: towers (TOWERS CAN REPAIR ANYTHING IN A ROOM!)
   }
 
   // Automatically delete memory of missing creeps

@@ -1,5 +1,5 @@
-import { getOutOfTheWay } from "utils/creeps";
-import { depositEnergy, getEnergyFromContainersOrHarvest, harvestEnergy } from "utils/energy";
+import { getOutOfTheWay, moveToRoom } from "utils/creeps";
+import { getEnergyFromContainersOrHarvest } from "utils/energy";
 
 export const builderBaseName = 'Bob';
 
@@ -10,16 +10,17 @@ const spawnBasic = (spawn: StructureSpawn, num?: number) => {
     spawnBasic(spawn, number + 1);
   }
 }
-
-const repair = (creep: Creep, target: Structure<StructureConstant>) => {
-	if (creep.repair(target) == ERR_NOT_IN_RANGE) {
-        creep.memory.buildingStructure = target.id;
-        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
-    }
-	if (target.hits === target.hitsMax) {
-		delete creep.memory.buildingStructure;
+const spawnForRoom = (spawn: StructureSpawn, targetRoom: string, num?: number) => {
+	const number = num || Object.keys(Game.creeps).filter(x => Game.creeps[x].memory.role === "builder" && Game.creeps[x].memory.workroom === targetRoom).length;
+	if (
+		Game.spawns[spawn.name].spawnCreep([WORK, CARRY, MOVE], targetRoom + '-' + builderBaseName + number, {
+			memory: { role: "builder", workroom: targetRoom }
+		}) === ERR_NAME_EXISTS
+	) {
+		spawnForRoom(spawn, targetRoom, number + 1);
 	}
 }
+
 const build = (creep: Creep, target: ConstructionSite<BuildableStructureConstant>) => {
     if (creep.build(target) == ERR_NOT_IN_RANGE) {
         creep.memory.buildingStructure = target.id;
@@ -30,52 +31,46 @@ const build = (creep: Creep, target: ConstructionSite<BuildableStructureConstant
 const roleBuilder = {
   /** @param {Creep} creep **/
   run: (creep: Creep) => {
-    if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
-      creep.memory.building = false;
-	    delete creep.memory.buildingStructure;
-      creep.say("🔄 get energy");
-    }
-    if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
-      delete creep.memory.harvestingFrom;
-      creep.memory.building = true;
-      creep.say("🚧 build");
-    }
+	if (creep.memory.workroom && creep.memory.workroom !== creep.room.name) {
+		moveToRoom(creep, creep.memory.workroom);
+	} else {
+		if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
+		  creep.memory.building = false;
+			delete creep.memory.buildingStructure;
+		  creep.say("🔄 get energy");
+		}
+		if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
+		  delete creep.memory.harvestingFrom;
+		  creep.memory.building = true;
+		  creep.say("🚧 build");
+		}
 
-    if (creep.memory.building && creep.memory.buildingStructure) {
-      const target = Game.getObjectById(creep.memory.buildingStructure);
-      if (target?.hits && target?.hits <= target?.hitsMax) {
-        // repair
-        repair(creep, target);
-      } else if (target?.progress < target?.progressTotal) {
-        // build
-        build(creep, target);
-      } else {
-        // unknown thing
-        console.log('Unknown build target ', JSON.stringify(target));
-        delete creep.memory.buildingStructure;
-      }
-    } else if (creep.memory.building) {
-      const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-      const thingsToRepair = creep.room.find<Structure>(FIND_STRUCTURES, {
-        filter: (object: Structure) =>  (object.hits < (object.hitsMax / 2)) })
-      if (thingsToRepair.length) {
-              repair(creep, thingsToRepair[0]);
-          } else if (targets.length) {
-              build(creep, targets[0]);
-          } else {
-            // nothing to build or repair
-            // return energy then suicide
-            depositEnergy(creep);
-            if (creep.store.energy === 0) {
-              // move out of the way
-              getOutOfTheWay(creep);
-            }
-          }
-    } else {
-      getEnergyFromContainersOrHarvest(creep);
-    }
+		if (creep.memory.building && creep.memory.buildingStructure) {
+		  const target = Game.getObjectById(creep.memory.buildingStructure);
+		  if (target?.progress < target?.progressTotal) {
+			// build
+			build(creep, target);
+		  } else {
+			// unknown thing
+			console.log('Unknown build target ', JSON.stringify(target));
+			delete creep.memory.buildingStructure;
+		  }
+		} else if (creep.memory.building) {
+		  const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+			if (targets.length > 0) {
+				build(creep, targets[0]);
+			} else {
+				// nothing to build or repair
+				// move out of the way
+				getOutOfTheWay(creep);
+			}
+		} else {
+		  getEnergyFromContainersOrHarvest(creep);
+		}
+	}
   },
-  spawnBasic
+  spawnBasic,
+  spawnForRoom
 };
 
 export default roleBuilder;

@@ -6,8 +6,9 @@ import { getNumberOfCreepsByName, getNumberOfCreepsByRole } from 'utils/creeps';
 
 const buildersWanted = (room: Room) => {
 	const constructionSites = room.find(FIND_CONSTRUCTION_SITES);
-	const thingsToRepair = room.find<Structure>(FIND_STRUCTURES).filter(struct => struct.hits < struct.hitsMax / 2);
-	return constructionSites.length >= 1 || thingsToRepair.length >= 3;
+	// const thingsToRepair = room.find<Structure>(FIND_STRUCTURES).filter(struct => struct.hits < struct.hitsMax / 2);
+	// return constructionSites.length >= 1 || thingsToRepair.length >= 3;
+	return constructionSites.length >= 1;
 }
 
 const totalEnergy = (spawn: StructureSpawn) => {
@@ -34,13 +35,16 @@ const buildingSpawn = {
 		}
 		if (totalEnergy(spawn) >= 600) {
 			// mid sized spawns
-			if (getNumberOfCreepsByName('BeefyHarry') <= 5) {
+			if (getNumberOfCreepsByName('W8N2-Harry') < 3) {
+				console.log('spawn harvester for room W8N2');
+				harvester.spawnAbroad(spawn, 'W8N2');
+			} else if (getNumberOfCreepsByName('BeefyHarry') < 5) {
 				console.log(
                     "spawn beefy harvester, total beefy harvesters will be " +
                         (getNumberOfCreepsByName("BeefyHarry") + 1)
                 );
 				harvester.spawnMid(spawn);
-			} else if (getNumberOfCreepsByName('BeefyUptownGirl') <= 5) {
+			} else if (getNumberOfCreepsByName('BeefyUptownGirl') < 5) {
 				console.log(
                     "spawn beefy upgrader, total beefy upgraders will be " + (getNumberOfCreepsByName("BeefyUptownGirl") + 1)
                 );

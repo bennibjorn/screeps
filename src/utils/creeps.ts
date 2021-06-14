@@ -16,3 +16,8 @@ export const getOutOfTheWay = (creep: Creep) => {
         creep.moveTo(ootw[0].pos);
     }
 }
+export const moveToRoom = (creep: Creep, room: string) => {
+	const to = new RoomPosition(25, 25, room);
+	const route = PathFinder.search(creep.pos, to);
+	creep.moveByPath(route.path);
+}

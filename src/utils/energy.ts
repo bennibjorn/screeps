@@ -77,13 +77,14 @@ const sortEnergyReceiversByPriority = ((a: Structure, b: Structure) => {
 	}
 })
 
-export const depositEnergy = (creep: Creep) => {
-    const targets = creep.room.find(FIND_STRUCTURES, {
+export const depositEnergy = (creep: Creep, targetRoom?: string) => {
+	let room = targetRoom ? Game.rooms[targetRoom] : creep.room;
+    const targets = room.find(FIND_STRUCTURES, {
         filter: (structure: any) => {
         return (structure.structureType == STRUCTURE_EXTENSION ||
                 structure.structureType == STRUCTURE_SPAWN ||
-                structure.structureType === STRUCTURE_CONTAINER ||
-                structure.structureType === STRUCTURE_TOWER) &&
+				structure.structureType === STRUCTURE_TOWER ||
+                structure.structureType === STRUCTURE_STORAGE) &&
             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
         }
     }).sort(sortEnergyReceiversByPriority);
@@ -93,3 +94,21 @@ export const depositEnergy = (creep: Creep) => {
         }
     }
 }
+
+export const depositEnergyInContainer = (creep: Creep, targetRoom?: string) => {
+    let room = targetRoom ? Game.rooms[targetRoom] : creep.room;
+    const targets = room
+        .find(FIND_STRUCTURES, {
+            filter: (structure: any) => {
+                return (
+                    (structure.structureType == STRUCTURE_CONTAINER) &&
+                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                );
+            }
+        });
+    if (targets.length > 0) {
+        if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
+        }
+    }
+};
