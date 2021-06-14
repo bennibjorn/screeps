@@ -2,6 +2,7 @@ import { ErrorMapper } from "utils/ErrorMapper";
 import harvester from './roles/harvester';
 import upgrader from './roles/upgrader';
 import builder from './roles/builder';
+import carrier from './roles/carrier';
 import spawn from './buildings/spawn';
 
 declare global {
@@ -58,8 +59,17 @@ export const loop = ErrorMapper.wrapLoop(() => {
     if (creep.memory.role == "builder") {
       builder.run(creep);
     }
+    if (creep.memory.role === 'carrier') {
+      carrier.run(creep);
+    }
   }
-  spawn.run(Game.spawns['Spawn1']);
+
+  for (const id in Game.structures) {
+    if (Game.structures[id].structureType === 'spawn') {
+      spawn.run(Game.structures[id] as StructureSpawn);
+    }
+    // TODO: towers
+  }
 
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {

@@ -1,6 +1,7 @@
 import harvester from 'roles/harvester';
 import upgrader from 'roles/upgrader';
 import builder from '../roles/builder';
+import carrier from '../roles/carrier';
 import { getNumberOfCreepsByName, getNumberOfCreepsByRole } from 'utils/creeps';
 
 const buildersWanted = (room: Room) => {
@@ -27,21 +28,23 @@ const buildingSpawn = {
 			} else if (buildersWanted(spawn.room) && getNumberOfCreepsByRole('builder') <= 3) {
 				console.log("spawn basic builder, total builders will be " + (getNumberOfCreepsByRole("builder") + 1));
 				builder.spawnBasic(spawn);
+			} else if (getNumberOfCreepsByRole('carrier') < 2) {
+				carrier.spawnBasic(spawn);
 			}
 		}
 		if (totalEnergy(spawn) >= 600) {
 			// mid sized spawns
-			if (getNumberOfCreepsByName('BeefyHarry') <= 3) {
+			if (getNumberOfCreepsByName('BeefyHarry') <= 5) {
 				console.log(
                     "spawn beefy harvester, total beefy harvesters will be " +
                         (getNumberOfCreepsByName("BeefyHarry") + 1)
                 );
-				harvester.spawnBeefy(spawn);
+				harvester.spawnMid(spawn);
 			} else if (getNumberOfCreepsByName('BeefyUptownGirl') <= 5) {
 				console.log(
                     "spawn beefy upgrader, total beefy upgraders will be " + (getNumberOfCreepsByName("BeefyUptownGirl") + 1)
                 );
-				upgrader.spawnBeefy(spawn);
+				upgrader.spawnMid(spawn);
 			}
 		}
 	}

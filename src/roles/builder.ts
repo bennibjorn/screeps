@@ -1,4 +1,5 @@
-import { getEnergyFromContainersOrHarvest, harvestEnergy } from "utils/energy";
+import { getOutOfTheWay } from "utils/creeps";
+import { depositEnergy, getEnergyFromContainersOrHarvest, harvestEnergy } from "utils/energy";
 
 export const builderBaseName = 'Bob';
 
@@ -61,6 +62,14 @@ const roleBuilder = {
               repair(creep, thingsToRepair[0]);
           } else if (targets.length) {
               build(creep, targets[0]);
+          } else {
+            // nothing to build or repair
+            // return energy then suicide
+            depositEnergy(creep);
+            if (creep.store.energy === 0) {
+              // move out of the way
+              getOutOfTheWay(creep);
+            }
           }
     } else {
       getEnergyFromContainersOrHarvest(creep);
