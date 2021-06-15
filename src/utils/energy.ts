@@ -1,4 +1,6 @@
-export const chooseSource = (creep: Creep, sources: Source[]): Id<Source> => {
+import { getOutOfTheWay } from "./creeps";
+
+export const chooseSource = (creep: Creep, sources: Source[]): Id<Source> | null => {
     // look for creeps at source location
     // look for walls at source location
     // if there is a free spot, remaining energy and regen is reasonable, choose it
@@ -12,7 +14,12 @@ export const chooseSource = (creep: Creep, sources: Source[]): Id<Source> => {
 			availableSpaces.push({ id: source.id, availableSpaces: free });
 		}
     });
-    return availableSpaces.sort((a, b) => b.availableSpaces - a.availableSpaces)[0].id;
+    const sorted = availableSpaces.sort((a, b) => b.availableSpaces - a.availableSpaces);
+	if (sorted.length > 0) {
+		return sorted[0].id;
+	} else {
+		return null;
+	}
 }
 export const harvestOrMoveTowardsSource = (creep: Creep, source: Source) => {
 	const res = creep.harvest(source);
@@ -42,52 +49,39 @@ export const harvestEnergy = (creep: Creep) => {
     }
 }
 export const getEnergyFromContainersOrHarvest = (creep: Creep, onlyContainers: boolean = false) => {
-    const containersWithEnergy = creep.room.find<StructureContainer>(FIND_STRUCTURES).filter((struct) => struct.structureType === STRUCTURE_CONTAINER && struct.store.energy > 0);
+    const containers = creep.room.find<StructureContainer | StructureLink>(FIND_STRUCTURES).filter((struct) =>
+		struct.structureType === STRUCTURE_CONTAINER || struct.structureType === 'link');
+	const containersWithEnergy = containers.filter(x => x.store.energy > 0);
     if (containersWithEnergy.length > 1) {
         // find closest, get from that one
-		const distances = containersWithEnergy.map((container) => {
-			return creep.pos.getRangeTo(container.pos);
-		});
-		const minDistanceIndex = distances.indexOf(Math.min(...distances));
-		if (creep.withdraw(containersWithEnergy[minDistanceIndex], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+        const distances = containersWithEnergy.map(container => {
+            return creep.pos.getRangeTo(container.pos);
+        });
+        const minDistanceIndex = distances.indexOf(Math.min(...distances));
+        if (creep.withdraw(containersWithEnergy[minDistanceIndex], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             creep.moveTo(containersWithEnergy[minDistanceIndex], { visualizePathStyle: { stroke: "#ffaa00" } });
         }
     } else if (containersWithEnergy.length === 1) {
         if (creep.withdraw(containersWithEnergy[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             creep.moveTo(containersWithEnergy[0], { visualizePathStyle: { stroke: "#ffaa00" } });
         }
-    } else if (!onlyContainers) {
-        // no containers with energy, harvest
+    } else if (!onlyContainers || containers.length === 0) {
+        // no containers with energy or no containers at all, harvest
         harvestEnergy(creep);
+    } else {
+        getOutOfTheWay(creep);
     }
 
 }
 
-const sortEnergyReceiversByPriority = ((a: Structure, b: Structure) => {
-	if (b.structureType === STRUCTURE_SPAWN && a.structureType !== STRUCTURE_SPAWN) {
-		return 3;
-	} else if (b.structureType === STRUCTURE_EXTENSION && a.structureType !== STRUCTURE_EXTENSION) {
-        return 2;
-    } else if (b.structureType === STRUCTURE_CONTAINER && a.structureType !== STRUCTURE_CONTAINER) {
-		return 1;
-	} else if (b.structureType === STRUCTURE_TOWER) {
-		return -1;
-	} else {
-		return 0;
-	}
-})
-
-export const depositEnergy = (creep: Creep, targetRoom?: string) => {
+export const harvesterDeposit = (creep: Creep, targetRoom?: string) => {
 	let room = targetRoom ? Game.rooms[targetRoom] : creep.room;
     const targets = room.find(FIND_STRUCTURES, {
         filter: (structure: any) => {
-        return (structure.structureType == STRUCTURE_EXTENSION ||
-                structure.structureType == STRUCTURE_SPAWN ||
-				structure.structureType === STRUCTURE_TOWER ||
-                structure.structureType === STRUCTURE_STORAGE) &&
+        return (structure.structureType === STRUCTURE_STORAGE) &&
             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
         }
-    }).sort(sortEnergyReceiversByPriority);
+    });
     if(targets.length > 0) {
         if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
@@ -125,8 +119,12 @@ export const carrierDeposit = (creep: Creep, predefinedTarget?: AnyStructure, ta
             creep.memory.target = tower.id;
             transferOrMoveTo(creep, tower);
         } else if (targets.length > 0) {
-            creep.memory.target = targets[0].id;
-            transferOrMoveTo(creep, targets[0]);
+			const distances = targets.map(target => {
+                return creep.pos.getRangeTo(target.pos);
+            });
+            const minDistanceIndex = distances.indexOf(Math.min(...distances));
+            creep.memory.target = targets[minDistanceIndex].id;
+            transferOrMoveTo(creep, targets[minDistanceIndex]);
         }
     }
 };

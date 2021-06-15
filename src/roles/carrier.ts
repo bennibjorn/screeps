@@ -2,7 +2,7 @@
 // move energy from a container near sources to a container near room controller
 
 import { creepTierNames } from "utils/creeps";
-import { depositEnergy, carrierDeposit } from "utils/energy";
+import { carrierDeposit } from "utils/energy";
 
 export const carrierBaseName = 'Heli';
 

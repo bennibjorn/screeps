@@ -1,3 +1,4 @@
+import { creepTierNames } from "utils/creeps";
 import { getEnergyFromContainersOrHarvest, harvestEnergy } from "utils/energy";
 
 export const upgraderBaseName = 'UptownGirl';
@@ -41,7 +42,7 @@ const roleUpgrader = {
         creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: "#ffffff" } });
       }
     } else {
-      getEnergyFromContainersOrHarvest(creep, true);
+      getEnergyFromContainersOrHarvest(creep, creep.name.startsWith(creepTierNames.mid) || creep.name.startsWith(creepTierNames.high));
     }
   },
   spawnBasic,

@@ -1,5 +1,5 @@
 import { creepTierNames, moveToRoom } from "utils/creeps";
-import { depositEnergy, harvestEnergy } from "utils/energy";
+import { harvesterDeposit, harvestEnergy } from "utils/energy";
 
 export const harvesterBaseName = 'Harry';
 
@@ -43,7 +43,7 @@ const roleHarvester = {
 		}
 		else {
 			delete creep.memory.harvestingFrom;
-			depositEnergy(creep);
+			harvesterDeposit(creep);
 		}
 	},
 	spawnBasic,
