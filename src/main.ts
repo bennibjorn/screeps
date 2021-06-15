@@ -25,6 +25,7 @@ declare global {
       role: string;
       room?: string;
       working?: boolean;
+      target?: Id<any>;
       upgrading?: boolean;
       building?: boolean;
       buildingStructure?: Id<any>;

@@ -41,7 +41,7 @@ export const harvestEnergy = (creep: Creep) => {
         }
     }
 }
-export const getEnergyFromContainersOrHarvest = (creep: Creep) => {
+export const getEnergyFromContainersOrHarvest = (creep: Creep, onlyContainers: boolean = false) => {
     const containersWithEnergy = creep.room.find<StructureContainer>(FIND_STRUCTURES).filter((struct) => struct.structureType === STRUCTURE_CONTAINER && struct.store.energy > 0);
     if (containersWithEnergy.length > 1) {
         // find closest, get from that one
@@ -56,7 +56,7 @@ export const getEnergyFromContainersOrHarvest = (creep: Creep) => {
         if (creep.withdraw(containersWithEnergy[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             creep.moveTo(containersWithEnergy[0], { visualizePathStyle: { stroke: "#ffaa00" } });
         }
-    } else {
+    } else if (!onlyContainers) {
         // no containers with energy, harvest
         harvestEnergy(creep);
     }
@@ -95,20 +95,38 @@ export const depositEnergy = (creep: Creep, targetRoom?: string) => {
     }
 }
 
-export const depositEnergyInContainer = (creep: Creep, targetRoom?: string) => {
-    let room = targetRoom ? Game.rooms[targetRoom] : creep.room;
-    const targets = room
-        .find(FIND_STRUCTURES, {
-            filter: (structure: any) => {
-                return (
-                    (structure.structureType == STRUCTURE_CONTAINER) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-                );
-            }
-        });
-    if (targets.length > 0) {
-        if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
+const transferOrMoveTo = (creep: Creep, target: AnyStructure) => {
+    if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
+    } else {
+        delete creep.memory.target;
+    }
+}
+
+export const carrierDeposit = (creep: Creep, predefinedTarget?: AnyStructure, targetRoom?: string) => {
+    if (predefinedTarget) {
+        transferOrMoveTo(creep, predefinedTarget);
+    } else {
+        let room = targetRoom ? Game.rooms[targetRoom] : creep.room;
+        const targets = room
+            .find(FIND_STRUCTURES, {
+                filter: (structure: any) => {
+                    return ((
+                        structure.structureType === STRUCTURE_TOWER ||
+                        structure.structureType === STRUCTURE_CONTAINER ||
+                        structure.structureType === STRUCTURE_EXTENSION ||
+                        structure.structureType === STRUCTURE_LINK) &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                    );
+                }
+            });
+        const tower = targets.find(x => x.structureType === STRUCTURE_TOWER) as StructureTower;
+        if (tower && tower.store.getFreeCapacity(RESOURCE_ENERGY) > 500) {
+            creep.memory.target = tower.id;
+            transferOrMoveTo(creep, tower);
+        } else if (targets.length > 0) {
+            creep.memory.target = targets[0].id;
+            transferOrMoveTo(creep, targets[0]);
         }
     }
 };

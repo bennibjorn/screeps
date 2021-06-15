@@ -41,7 +41,7 @@ const roleUpgrader = {
         creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: "#ffffff" } });
       }
     } else {
-      getEnergyFromContainersOrHarvest(creep);
+      getEnergyFromContainersOrHarvest(creep, true);
     }
   },
   spawnBasic,

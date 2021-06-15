@@ -35,15 +35,18 @@ const buildingSpawn = {
 		}
 		if (totalEnergy(spawn) >= 600) {
 			// mid sized spawns
-			if (getNumberOfCreepsByName('W8N2-Harry') < 3) {
-				console.log('spawn harvester for room W8N2');
-				harvester.spawnAbroad(spawn, 'W8N2');
-			} else if (getNumberOfCreepsByName('BeefyHarry') < 5) {
+			if (getNumberOfCreepsByName('BeefyHarry') < 5) {
 				console.log(
                     "spawn beefy harvester, total beefy harvesters will be " +
                         (getNumberOfCreepsByName("BeefyHarry") + 1)
                 );
 				harvester.spawnMid(spawn);
+			} else if (getNumberOfCreepsByName('BeefyHeli') < 5) {
+				console.log('spawn beefy carrier');
+				carrier.spawnMid(spawn);
+			// } else if (getNumberOfCreepsByName('W8N2-Harry') < 3) {
+			// 	console.log('spawn harvester for room W8N2');
+			// 	harvester.spawnAbroad(spawn, 'W8N2');
 			} else if (getNumberOfCreepsByName('BeefyUptownGirl') < 5) {
 				console.log(
                     "spawn beefy upgrader, total beefy upgraders will be " + (getNumberOfCreepsByName("BeefyUptownGirl") + 1)
