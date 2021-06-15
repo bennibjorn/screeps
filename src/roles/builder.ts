@@ -1,5 +1,6 @@
 import { getOutOfTheWay, moveToRoom } from "utils/creeps";
 import { getEnergyFromContainersOrHarvest } from "utils/energy";
+import { pathVisuals } from "utils/pathVisual";
 
 export const builderBaseName = 'Bob';
 
@@ -24,7 +25,7 @@ const spawnForRoom = (spawn: StructureSpawn, targetRoom: string, num?: number) =
 const build = (creep: Creep, target: ConstructionSite<BuildableStructureConstant>) => {
     if (creep.build(target) == ERR_NOT_IN_RANGE) {
         creep.memory.buildingStructure = target.id;
-        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
+        creep.moveTo(target, { visualizePathStyle: { stroke: pathVisuals.build.color, lineStyle: pathVisuals.build.lineStyle } });
     }
 };
 
@@ -37,7 +38,7 @@ const roleBuilder = {
 		if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
 		  creep.memory.building = false;
 			delete creep.memory.buildingStructure;
-		  creep.say("🔄 get energy");
+		  creep.say("🔄 collect");
 		}
 		if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
 		  delete creep.memory.harvestingFrom;

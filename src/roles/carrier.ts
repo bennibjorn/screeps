@@ -3,6 +3,7 @@
 
 import { creepTierNames } from "utils/creeps";
 import { carrierDeposit } from "utils/energy";
+import { pathVisuals } from "utils/pathVisual";
 
 export const carrierBaseName = 'Heli';
 
@@ -25,13 +26,17 @@ const spawnMid = (spawn: StructureSpawn, num?: number) => {
 
 const pickupOrApproach = (creep: Creep, target: Resource<ResourceConstant>) => {
 	if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffaabb" } });
+        creep.moveTo(target, {
+            visualizePathStyle: { stroke: pathVisuals.harvest.color, lineStyle: pathVisuals.harvest.lineStyle }
+        });
     }
 }
 
 const withdrawOrApproach = (creep: Creep, target: Tombstone | Ruin | StructureStorage) => {
     if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffaabb" } });
+        creep.moveTo(target, {
+            visualizePathStyle: { stroke: pathVisuals.harvest.color, lineStyle: pathVisuals.harvest.lineStyle }
+        });
         return;
     } else {
         delete creep.memory.target;
@@ -41,10 +46,21 @@ const withdrawOrApproach = (creep: Creep, target: Tombstone | Ruin | StructureSt
 const roleCarrier = {
     /** @param {Creep} creep **/
     run: (creep: Creep) => {
-        if(creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+		if (creep.memory.target !== undefined) {
+            // had a deposit target
+            const thing = Game.getObjectById(creep.memory.target);
+            if (thing?.store?.getFreeCapacity && thing?.store?.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                // target energy store is not full, continue moving towards it
+                carrierDeposit(creep, thing);
+            } else {
+                delete creep.memory.target;
+            }
+        } else if (creep.store.energy > 0) {
+			carrierDeposit(creep);
+		} else if(creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
             if (creep.memory.target !== undefined) {
                 // already have a target
-                const thing = Game.getObjectById(creep.memory.target);
+                const thing: any = Game.getObjectById(creep.memory.target);
                 if (thing?.store?.getFreeCapacity && thing?.store?.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                     // target energy store is not full, continue moving towards it
                     withdrawOrApproach(creep, thing);
@@ -78,20 +94,6 @@ const roleCarrier = {
 			} else if (creep.store.energy > 0) {
                 carrierDeposit(creep);
             }
-        }
-        else if (creep.memory.target !== undefined) {
-            // had a deposit target
-            const thing = Game.getObjectById(creep.memory.target);
-            if (thing?.store?.getFreeCapacity && thing?.store?.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                // target energy store is not full, continue moving towards it
-                carrierDeposit(creep, thing);
-            } else {
-                delete creep.memory.target;
-            }
-        }
-        else {
-            // deposit to container near room controller
-            carrierDeposit(creep);
         }
     },
     spawnBasic,

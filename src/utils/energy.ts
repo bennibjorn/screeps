@@ -1,4 +1,5 @@
 import { getOutOfTheWay } from "./creeps";
+import { pathVisuals } from "./pathVisual";
 
 export const chooseSource = (creep: Creep, sources: Source[]): Id<Source> | null => {
     // look for creeps at source location
@@ -24,7 +25,9 @@ export const chooseSource = (creep: Creep, sources: Source[]): Id<Source> | null
 export const harvestOrMoveTowardsSource = (creep: Creep, source: Source) => {
 	const res = creep.harvest(source);
     if (res === ERR_NOT_IN_RANGE) {
-        const moveRes = creep.moveTo(source, { visualizePathStyle: { stroke: "#ffaa00" } });
+        const moveRes = creep.moveTo(source, {
+            visualizePathStyle: { stroke: pathVisuals.harvest.color, lineStyle: pathVisuals.harvest.lineStyle }
+        });
 		if (moveRes === ERR_NO_PATH) {
 			delete creep.memory.harvestingFrom;
 		}
@@ -59,11 +62,15 @@ export const getEnergyFromContainersOrHarvest = (creep: Creep, onlyContainers: b
         });
         const minDistanceIndex = distances.indexOf(Math.min(...distances));
         if (creep.withdraw(containersWithEnergy[minDistanceIndex], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(containersWithEnergy[minDistanceIndex], { visualizePathStyle: { stroke: "#ffaa00" } });
+            creep.moveTo(containersWithEnergy[minDistanceIndex], {
+                visualizePathStyle: { stroke: pathVisuals.harvest.color, lineStyle: pathVisuals.harvest.lineStyle }
+            });
         }
     } else if (containersWithEnergy.length === 1) {
         if (creep.withdraw(containersWithEnergy[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(containersWithEnergy[0], { visualizePathStyle: { stroke: "#ffaa00" } });
+            creep.moveTo(containersWithEnergy[0], {
+                visualizePathStyle: { stroke: pathVisuals.harvest.color, lineStyle: pathVisuals.harvest.lineStyle }
+            });
         }
     } else if (!onlyContainers || containers.length === 0) {
         // no containers with energy or no containers at all, harvest
@@ -84,14 +91,18 @@ export const harvesterDeposit = (creep: Creep, targetRoom?: string) => {
     });
     if(targets.length > 0) {
         if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+            creep.moveTo(targets[0], {
+                visualizePathStyle: { stroke: pathVisuals.deposit.color, lineStyle: pathVisuals.deposit.lineStyle }
+            });
         }
     }
 }
 
 const transferOrMoveTo = (creep: Creep, target: AnyStructure) => {
     if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
+        creep.moveTo(target, {
+            visualizePathStyle: { stroke: pathVisuals.deposit.color, lineStyle: pathVisuals.deposit.lineStyle }
+        });
     } else {
         delete creep.memory.target;
     }

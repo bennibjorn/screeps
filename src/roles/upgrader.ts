@@ -1,5 +1,6 @@
 import { creepTierNames } from "utils/creeps";
 import { getEnergyFromContainersOrHarvest, harvestEnergy } from "utils/energy";
+import { pathVisuals } from "utils/pathVisual";
 
 export const upgraderBaseName = 'UptownGirl';
 
@@ -39,7 +40,9 @@ const roleUpgrader = {
 
     if (creep.memory.upgrading && creep.room.controller) {
       if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: "#ffffff" } });
+        creep.moveTo(creep.room.controller, {
+            visualizePathStyle: { stroke: pathVisuals.upgrade.color, lineStyle: pathVisuals.upgrade.lineStyle }
+        });
       }
     } else {
       getEnergyFromContainersOrHarvest(creep, creep.name.startsWith(creepTierNames.mid) || creep.name.startsWith(creepTierNames.high));
