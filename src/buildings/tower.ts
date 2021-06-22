@@ -5,8 +5,11 @@ const totalEnergy = (tower: StructureTower) => {
 const buildingTower = {
     run: (tower: StructureTower) => {
 		if (tower.store.energy === 0) return;
+		const enemies = tower.room.find(FIND_HOSTILE_CREEPS);
         const repairTargets = tower.room.find(FIND_STRUCTURES, { filter: structure => structure.hits < (structure.hitsMax / 2) })
-        if (repairTargets.length > 0) {
+        if (enemies.length > 0) {
+			tower.attack(enemies[0]);
+		} else if (repairTargets.length > 0) {
 			tower.repair(repairTargets[0]);
 		}
     }

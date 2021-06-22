@@ -2,7 +2,9 @@ import harvester from 'roles/harvester';
 import upgrader from 'roles/upgrader';
 import builder from '../roles/builder';
 import carrier from '../roles/carrier';
+import claimer from '../roles/claimer';
 import { getNumberOfCreepsByName, getNumberOfCreepsByRole } from 'utils/creeps';
+import { getRoomToExpandTo } from 'utils/expansion';
 
 const buildersWanted = (room: Room) => {
 	const constructionSites = room.find(FIND_CONSTRUCTION_SITES);
@@ -52,7 +54,12 @@ const buildingSpawn = {
                     "spawn beefy upgrader, total beefy upgraders will be " + (getNumberOfCreepsByName("BeefyUptownGirl") + 1)
                 );
 				upgrader.spawnMid(spawn);
-			}
+			} else if (getRoomToExpandTo() !== null && getNumberOfCreepsByRole('claimer') !== 0) {
+                const room = getRoomToExpandTo() as string;
+				claimer.spawn(spawn, room)
+                // no controller owned in this room, yet to claim
+                // spawn one claimer, only have one claimer spawned at a time (for each room?)
+            }
 		}
 	}
 };
