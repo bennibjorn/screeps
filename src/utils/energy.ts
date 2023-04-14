@@ -2,25 +2,43 @@ import { getOutOfTheWay } from "./creeps";
 import { pathVisuals } from "./pathVisual";
 
 export const chooseSource = (creep: Creep, sources: Source[]): Id<Source> | null => {
+    // TODO: this available spaces thing does not work
     // look for creeps at source location
     // look for walls at source location
     // if there is a free spot, remaining energy and regen is reasonable, choose it
-	const availableSpaces: Array<{ id: Id<Source>, availableSpaces: number }> = [];
-    sources.forEach((source) => {
-        const mostAvailableSides = 9;
-        const creepsAtSource = creep.room.lookForAtArea(LOOK_CREEPS, source.pos.y + 1, source.pos.x - 1, source.pos.y - 1, source.pos.x + 1, true).length;
-        const wallsAtSource = creep.room.lookForAtArea(LOOK_TERRAIN, source.pos.y + 1, source.pos.x - 1, source.pos.y - 1, source.pos.x + 1, true).length;
-        const free = mostAvailableSides - creepsAtSource - wallsAtSource;
-		if (source.energy !== 0) {
-			availableSpaces.push({ id: source.id, availableSpaces: free });
-		}
-    });
-    const sorted = availableSpaces.sort((a, b) => b.availableSpaces - a.availableSpaces);
-	if (sorted.length > 0) {
-		return sorted[0].id;
-	} else {
-		return null;
-	}
+	// const availableSpaces: Array<{ id: Id<Source>, availableSpaces: number }> = [];
+    // sources.forEach((source) => {
+    //     const mostAvailableSides = 9;
+    //     const creepsAtSource = creep.room.lookForAtArea(LOOK_CREEPS, source.pos.y + 1, source.pos.x - 1, source.pos.y - 1, source.pos.x + 1, true);
+    //     const wallsAtSource = creep.room.lookForAtArea(LOOK_TERRAIN, source.pos.y + 1, source.pos.x - 1, source.pos.y - 1, source.pos.x + 1, true);
+    //     const free = mostAvailableSides - creepsAtSource.length - wallsAtSource.length;
+	// 	if (source.energy !== 0) {
+	// 		availableSpaces.push({ id: source.id, availableSpaces: free });
+ 	// 	}
+    // });
+    // const sorted = availableSpaces.sort((a, b) => b.availableSpaces - a.availableSpaces);
+    // for (let i = 0; i < sorted.length; i++) {
+    //     console.log(JSON.stringify(sorted))
+    //     if (sorted[i].availableSpaces > 0) {
+    //         return sorted[i].id;
+    //     }
+    // }
+    // return null;
+    const creepsHarvesting = creep.room.find(FIND_CREEPS).filter(x => x.memory.harvestingFrom !== undefined);
+    const harvestersAtSources = sources.map((source) => {
+        return {
+            harvestingNum: creepsHarvesting.filter(x => x.memory.harvestingFrom === source.id).length,
+            id: source.id
+        }
+    })
+    const least = harvestersAtSources.reduce((prev, curr) => {
+        if (curr.harvestingNum > prev.harvestingNum) {
+            return prev;
+        } else {
+            return curr;
+        }
+    })
+    return least.id;
 }
 export const harvestOrMoveTowardsSource = (creep: Creep, source: Source) => {
 	const res = creep.harvest(source);

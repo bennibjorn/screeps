@@ -20,7 +20,8 @@ const buildingSpawn = {
 		if (spawn.spawning) return;
 		if (totalEnergy(spawn) >= 200) {
 			// must have spawns first
-			if (getNumberOfCreepsByRole('harvester') <= 2) {
+			const isStorageInRoom = spawn.room.find(FIND_MY_STRUCTURES).filter(x => x.structureType === 'storage').length > 0;
+			if (getNumberOfCreepsByRole('harvester') <= 2 && isStorageInRoom) {
 				console.log("spawn basic harvester, total harvesters will be: " + (getNumberOfCreepsByRole('harvester') + 1));
                 harvester.spawnBasic(spawn);
 			} else if (getNumberOfCreepsByRole('upgrader') === 0) {

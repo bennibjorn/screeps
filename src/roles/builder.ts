@@ -32,9 +32,6 @@ const build = (creep: Creep, target: ConstructionSite<BuildableStructureConstant
 const roleBuilder = {
   /** @param {Creep} creep **/
   run: (creep: Creep) => {
-	if (creep.memory.workroom && creep.memory.workroom !== creep.room.name) {
-		moveToRoom(creep, creep.memory.workroom);
-	} else {
 		if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
 		  creep.memory.building = false;
 			delete creep.memory.buildingStructure;
@@ -68,10 +65,8 @@ const roleBuilder = {
 		} else {
 		  getEnergyFromContainersOrHarvest(creep);
 		}
-	}
   },
   spawnBasic,
-  spawnForRoom
 };
 
 export default roleBuilder;
